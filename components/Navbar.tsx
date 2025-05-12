@@ -28,7 +28,7 @@ export default function Navbar() {
         {/* Logo + Brand Name */}
         <div className="flex items-center gap-2">
           <Image src="/assets/images/logo.png" alt="Tulip Tours" width={50} height={50} />
-          <Link href="/" className="text-2xl font-bold text-purple-600">
+          <Link href="/" className="text-2xl font-bold text-[#11999D] ">
             Tulip Tours
           </Link>
         </div>
@@ -39,7 +39,7 @@ export default function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className={`text-gray-700 hover:text-purple-600 px-3 py-2 rounded-md font-semibold transition ${activeLink === link.href ? 'text-purple-600' : ''
+              className={`text-gray-700 hover:text-[#11999D] px-3 py-2 rounded-md font-semibold transition ${activeLink === link.href ? 'text-purple-600' : ''
                 }`}
               onClick={() => handleClick(link.href)}
             >
@@ -52,17 +52,17 @@ export default function Navbar() {
         <div className="hidden lg:flex items-center gap-4">
           <SignedOut>
             <SignInButton>
-              <button className="text-sm px-4 py-2 bg-purple-600 text-white rounded">Inloggen</button>
+              <button className="text-sm px-4 py-2 bg-[#11999D] text-white rounded hover:bg-black">Inloggen</button>
             </SignInButton>
             <SignUpButton>
-              <button className="text-sm px-4 py-2 bg-purple-300 text-white rounded">Account Aanmaken</button>
+              <button className="text-sm px-4 py-2 bg-[#11999D] text-white rounded hover:bg-black">Account Aanmaken</button>
             </SignUpButton>
           </SignedOut>
           <SignedIn>
             <div className="flex items-center gap-4">
               <Link
                 href="/dashboard"
-                className="text-sm px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition"
+                className="text-sm px-4 py-2 bg-[#11999D] text-white rounded hover:bg-black transition"
               >
                 Dashboard
               </Link>

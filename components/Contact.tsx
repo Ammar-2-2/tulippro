@@ -45,26 +45,26 @@ export default function ContactSection() {
         <section id="contact" className="bg-white py-20 px-4">
             <div className="max-w-7xl mx-auto text-left">
                 <div className="mb-12 text-center">
-                    <h2 className="text-3xl font-bold text-purple-700">Neem contact op</h2>
+                    <h2 className="text-3xl font-bold text-[#11999D]">Neem contact op</h2>
                     <p className="text-gray-600 mt-2">📍 Sluit je aan bij ons volgende avontuur. Laat ons je meenemen op een onvergetelijke reis! ✨</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-10 bg-white shadow-lg rounded-xl p-8">
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">📞</div>
+                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">📞</div>
                             <span className="text-gray-700">+31613333021</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">📞</div>
+                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">📞</div>
                             <span className="text-gray-700">+31613333164</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">✉️</div>
+                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">✉️</div>
                             <span className="text-gray-700">info@tuliptrip.com</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">📍</div>
+                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">📍</div>
                             <span className="text-gray-700">Amsterdam, Nederland</span>
                         </div>
                     </div>
@@ -111,7 +111,7 @@ export default function ContactSection() {
                         </div>
                         <button
                             type="submit"
-                            className="bg-purple-700 text-white py-2 px-6 rounded hover:bg-purple-800 transition"
+                            className="bg-[#11999D] text-white py-2 px-6 rounded hover:bg-black transition"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Verzenden...' : 'Bericht verzenden'}

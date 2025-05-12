@@ -10,22 +10,22 @@ export default function Hero() {
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
         {/* Text Content */}
         <div className="text-left md:text-left">
-          <h1 className="text-4xl md:text-5xl font-bold leading-snug mb-6">
-            <span className="text-purple-600">Tulip Tours</span> - Jouw Gids voor het Ontdekken van Nederland en Europa
+          <h1 className="text-4xl md:text-5xl font-bold leading-snug mb-6 text-black">
+            <span className="text-[#11999D]">Tulip Tours</span> - Jouw Gids voor het Ontdekken van Nederland en Europa
           </h1>
-          <p className="text-gray-700 text-lg mb-8">
+          <p className="text-black text-lg mb-8">
             Ontdek de magie van Nederland en Europa met Tulip Tours! Wij bieden unieke reiservaringen, plezierige rondleidingen en persoonlijke diensten om je reis onvergetelijk te maken.
           </p>
           <div className="flex flex-col sm:flex-row justify-center md:justify-end gap-4">
             <Link
               href="#contact"
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-md font-semibold text-center"
+              className="bg-[#11999D] hover:bg-black text-white px-6 py-3 rounded-md font-semibold text-center"
             >
               Boek nu
             </Link>
             <Link
               href="#offers"
-              className="bg-purple-100 hover:bg-purple-200 text-purple-700 px-6 py-3 rounded-md font-semibold text-center"
+              className="bg-[#11999D] hover:bg-black text-white px-6 py-3 rounded-md font-semibold text-center"
             >
               Onze Aanbiedingen
             </Link>

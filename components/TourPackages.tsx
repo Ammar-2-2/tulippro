@@ -59,7 +59,7 @@ export default function TourPackages() {
   return (
     <section id="offers" className="bg-gray-100 py-16">
       <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold text-purple-700 mb-4">Onze Speciale Aanbiedingen</h2>
+        <h2 className="text-3xl font-bold text-[#11999D] mb-4">Onze Speciale Aanbiedingen</h2>
         <p className="text-gray-700 mb-10 max-w-3xl mx-auto">
           Bij Tulip bieden we op maat gemaakte reisaanbiedingen en -pakketten aan die zijn ontworpen om aan ieders wensen en budget te voldoen. Of je nu op zoek bent naar unieke rondreizen, betaalbare vliegtickets en hotelboekingen, of luxe ontvangst- en transportdiensten, wij hebben alles wat je nodig hebt.
         </p>
@@ -90,7 +90,7 @@ export default function TourPackages() {
                 </p>
                 <button
                   onClick={() => handleBook(pkg.id)}
-                  className="mt-auto px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                  className="mt-auto px-4 py-2 bg-[#11999D] text-white rounded hover:bg-black"
                 >
                   Boek nu
                 </button>
