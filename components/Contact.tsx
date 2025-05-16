@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 
 export default function ContactSection() {
     const [form, setForm] = useState({ name: '', email: '', message: '', agree: false });
@@ -19,22 +18,27 @@ export default function ContactSection() {
         setIsSubmitting(true);
 
         try {
-            const { error } = await supabase.from('messages').insert([
-                {
+            const res = await fetch('/api/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                     name: form.name,
                     email: form.email,
                     message: form.message,
-                    is_replied: false,
-                    is_read: false,
-                },
-            ]);
+                }),
+            });
 
-            if (error) throw new Error(error.message);
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Failed to send message');
+            }
 
             setForm({ name: '', email: '', message: '', agree: false });
             setSuccessMessage('Your message has been sent successfully!');
         } catch (error) {
-            console.error('Error inserting message:', error);
+            console.error('Error sending message:', error);
             setSuccessMessage('Something went wrong. Please try again later.');
         } finally {
             setIsSubmitting(false);
@@ -45,26 +49,26 @@ export default function ContactSection() {
         <section id="contact" className="bg-white py-20 px-4">
             <div className="max-w-7xl mx-auto text-left">
                 <div className="mb-12 text-center">
-                    <h2 className="text-3xl font-bold text-[#11999D]">Neem contact op</h2>
+                    <h2 className="text-3xl font-bold text-purple-700">Neem contact op</h2>
                     <p className="text-gray-600 mt-2">📍 Sluit je aan bij ons volgende avontuur. Laat ons je meenemen op een onvergetelijke reis! ✨</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-10 bg-white shadow-lg rounded-xl p-8">
                     <div className="space-y-6">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">📞</div>
+                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">📞</div>
                             <span className="text-gray-700">+31613333021</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">📞</div>
+                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">📞</div>
                             <span className="text-gray-700">+31613333164</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">✉️</div>
+                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">✉️</div>
                             <span className="text-gray-700">info@tuliptrip.com</span>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#11999D] text-white rounded-full flex items-center justify-center">📍</div>
+                            <div className="w-10 h-10 bg-purple-600 text-white rounded-full flex items-center justify-center">📍</div>
                             <span className="text-gray-700">Amsterdam, Nederland</span>
                         </div>
                     </div>
@@ -111,7 +115,7 @@ export default function ContactSection() {
                         </div>
                         <button
                             type="submit"
-                            className="bg-[#11999D] text-white py-2 px-6 rounded hover:bg-black transition"
+                            className="bg-purple-700 text-white py-2 px-6 rounded hover:bg-purple-800 transition"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Verzenden...' : 'Bericht verzenden'}

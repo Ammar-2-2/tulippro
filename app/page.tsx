@@ -16,7 +16,7 @@ export default async function HomePage() {
       <Hero />
       <Services />
       <TourPackages />
-      <AboutSection />
+      <AboutSection />  
 
       <Blogs />
       <ContactSection />

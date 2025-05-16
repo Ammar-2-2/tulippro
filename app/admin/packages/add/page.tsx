@@ -1,6 +1,5 @@
 'use client';
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
 export default function AddPackage() {
@@ -19,9 +18,19 @@ export default function AddPackage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const { error } = await supabase.from('packages').insert([form]);
-        if (!error) router.push('/admin/dashboard');
-        else alert('Error adding package');
+        const res = await fetch('/api/packages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(form),
+        });
+
+        if (res.ok) {
+            router.push('/admin/dashboard');
+        } else {
+            alert('Error adding package');
+        }
     };
 
     return (

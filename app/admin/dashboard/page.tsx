@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
 import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import DashboardAnalytics from '@/components/DashboardAnalytics';
 
 type BlogPost = {
     id: string;
@@ -53,26 +53,37 @@ export default function AdminDashboard() {
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [tourPackages, setTourPackages] = useState<TourPackage[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [activeTab, setActiveTab] = useState<'bookings' | 'messages' | 'blogs' | 'packages'>('bookings');
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'messages' | 'blogs' | 'packages'>('dashboard');
     const [responseData, setResponseData] = useState<Record<string, string>>({});
     const [editingMessages, setEditingMessages] = useState<Set<string>>(new Set());
 
     const router = useRouter();
 
     useEffect(() => {
+        // Always fetch bookings, packages, and messages for the dashboard
+        fetchBookings();
+        fetchPackages();
+        fetchMessages();
+
+        // Fetch blogs only when needed
         if (activeTab === 'blogs') fetchBlogs();
-        if (activeTab === 'bookings') fetchBookings();
-        if (activeTab === 'packages') fetchPackages();
-        if (activeTab === 'messages') fetchMessages();
     }, [activeTab]);
 
     const fetchMessages = async () => {
-        const { data, error } = await supabase
-            .from('messages')
-            .select('id, message, response, is_replied, is_read, name, email')
-            .order('created_at', { ascending: false });
-
-        if (!error && data) setMessages(data);
+        try {
+            const res = await fetch('/api/messages');
+            if (!res.ok) throw new Error('Failed to fetch messages');
+            const data = await res.json();
+            setMessages(data);
+            // Initialize responseData with existing responses
+            const initialResponseData: Record<string, string> = {};
+            data.forEach((msg: Message) => {
+                initialResponseData[msg.id] = msg.response || '';
+            });
+            setResponseData(initialResponseData);
+        } catch (error) {
+            console.error('Error loading messages:', error);
+        }
     };
 
     const sendResponse = async (id: string) => {
@@ -82,18 +93,29 @@ export default function AdminDashboard() {
             return;
         }
 
-        await supabase
-            .from('messages')
-            .update({ response, is_replied: true, is_read: false })
-            .eq('id', id);
+        try {
+            // Using the dedicated update endpoint
+            const res = await fetch(`/api/messages/update/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ response, is_replied: true, is_read: false }),
+            });
 
-        setEditingMessages((prev) => {
-            const updated = new Set(prev);
-            updated.delete(id);
-            return updated;
-        });
+            if (!res.ok) throw new Error('Failed to send response');
 
-        fetchMessages();
+            setEditingMessages((prev) => {
+                const updated = new Set(prev);
+                updated.delete(id);
+                return updated;
+            });
+
+            fetchMessages();
+        } catch (error) {
+            console.error('Error sending response:', error);
+            alert('Failed to send response. Please try again.');
+        }
     };
 
     const fetchBookings = async () => {
@@ -108,22 +130,40 @@ export default function AdminDashboard() {
     };
 
     const fetchBlogs = async () => {
-        const { data, error } = await supabase
-            .from('blog_posts')
-            .select('id, title, subtitle, posted_at')
-            .order('posted_at', { ascending: false });
-
-        if (!error && data) setBlogPosts(data);
+        try {
+            const res = await fetch('/api/blogs');
+            if (!res.ok) throw new Error('Failed to fetch blogs');
+            const data = await res.json();
+            setBlogPosts(data);
+        } catch (error) {
+            console.error('Error loading blogs:', error);
+        }
     };
 
     const fetchPackages = async () => {
-        const { data, error } = await supabase.from('packages').select('*').order('start_date', { ascending: true });
-        if (!error && data) setTourPackages(data);
+        try {
+            const res = await fetch('/api/packages');
+            if (!res.ok) throw new Error('Failed to fetch packages');
+            const data = await res.json();
+            setTourPackages(data);
+        } catch (error) {
+            console.error('Error loading packages:', error);
+        }
     };
 
     const deleteBlog = async (id: string) => {
-        const { error } = await supabase.from('blog_posts').delete().eq('id', id);
-        if (!error) setBlogPosts(prev => prev.filter(blog => blog.id !== id));
+        try {
+            const res = await fetch(`/api/blogs/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!res.ok) throw new Error('Failed to delete blog');
+
+            setBlogPosts(prev => prev.filter(blog => blog.id !== id));
+        } catch (error) {
+            console.error('Error deleting blog:', error);
+            alert('Failed to delete blog. Please try again.');
+        }
     };
 
     const handleAddBlogClick = () => {
@@ -168,6 +208,7 @@ export default function AdminDashboard() {
                 </div>
                 <nav className="space-y-4">
                     {[
+                        ['dashboard', '📊 Dashboard'],
                         ['bookings', '📦 Bookings'],
                         ['messages', '💬 Messages'],
                         ['blogs', '📝 Blogs'],
@@ -175,7 +216,7 @@ export default function AdminDashboard() {
                     ].map(([tab, label]) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab as 'bookings' | 'messages' | 'blogs' | 'packages')}
+                            onClick={() => setActiveTab(tab as 'dashboard' | 'bookings' | 'messages' | 'blogs' | 'packages')}
                             className={`block w-full text-left px-4 py-2 rounded ${activeTab === tab ? 'bg-purple-600 text-white' : 'hover:bg-purple-100 text-gray-700'}`}
                         >
                             {label}
@@ -194,6 +235,18 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 p-8">
+                {/* Dashboard Tab */}
+                {activeTab === 'dashboard' && (
+                    <div>
+                        <h1 className="text-2xl font-bold mb-6 text-purple-700">Dashboard Analytics</h1>
+                        <DashboardAnalytics
+                            bookings={bookings}
+                            tourPackages={tourPackages}
+                            messages={messages}
+                        />
+                    </div>
+                )}
+
                 {activeTab === 'messages' && (
                     <div>
                         <h1 className="text-2xl font-bold mb-6 text-purple-700">All Messages</h1>

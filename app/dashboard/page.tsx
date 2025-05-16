@@ -1,7 +1,6 @@
 'use client';
 import { useUser, UserButton } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import MessagesTab from '@/components/MessagesTab';
 
@@ -30,44 +29,47 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'bookings' | 'messages'>('bookings');
 
   const [bookings, setBookings] = useState<Booking[]>([]);
-  console.log("🚀 ~ Dashboard ~ bookings:", bookings);
 
   useEffect(() => {
-    if (!user) return;
-
     const createBookingIfNeeded = async () => {
       const storedPackageId = localStorage.getItem('selected_package');
-      if (storedPackageId) {
-        const { error } = await supabase.from('bookings').insert({
-          user_id: user.id,
-          package_id: storedPackageId,
-        });
 
-        if (!error) {
+      if (storedPackageId) {
+        try {
+          await fetch('/api/bookings', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: user.id,
+              package_id: storedPackageId,
+            }),
+          });
+
           localStorage.removeItem('selected_package');
-        } else {
-          console.error('Error creating booking from stored package:', error.message);
+        } catch (error) {
+          console.error('Error creating booking from stored package:', error);
         }
       }
     };
 
     const fetchBookings = async () => {
-      const { data, error } = await supabase
-        .from('bookings')
-        .select('id, created_at, packages (title, image_url, description, start_date, end_date)')
-        .eq('user_id', user.id);
-
-      console.log("🚀 ~ fetchBookings ~ data:", data);
-      if (!error && data) {
-        setBookings(data as unknown as Booking[]);
-      } else {
-        console.error('Error fetching bookings:', error?.message);
+      try {
+        const res = await fetch('/api/bookings');
+        const data = await res.json();
+        const userBookings = data.filter((b: any) => b.user_id === user.id);
+        setBookings(userBookings);
+      } catch (error) {
+        console.error('Error fetching bookings:', error);
       }
-
     };
 
-    createBookingIfNeeded().then(fetchBookings);
-  }, [user]);
+    if (user?.id) {
+      createBookingIfNeeded();
+      fetchBookings();
+    }
+  }, [user?.id]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">

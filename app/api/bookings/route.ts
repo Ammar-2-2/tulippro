@@ -1,36 +1,61 @@
+import { executeQuery } from '@/lib/mysql';
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
-import { clerkClient } from "@clerk/clerk-sdk-node";
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from('bookings')
-    .select(`id, created_at, user_id, packages:package_id ( title, image_url, start_date,end_date )`);
+  try {
+    const data = await executeQuery<any[]>({
+      query: `
+        SELECT 
+          b.id, 
+          b.created_at, 
+          b.user_id, 
+          p.id as package_id, 
+          p.title, 
+          p.image_url, 
+          p.start_date, 
+          p.end_date
+        FROM bookings b
+        JOIN packages p ON b.package_id = p.id
+      `
+    });
 
-  if (error) {
+    const transformedData = data.map(booking => ({
+      id: booking.id,
+      created_at: booking.created_at,
+      user_id: booking.user_id,
+      packages: {
+        title: booking.title,
+        image_url: booking.image_url,
+        start_date: booking.start_date,
+        end_date: booking.end_date
+      }
+    }));
+
+    return NextResponse.json(transformedData);
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+}
 
-  // Map user emails using Clerk
-  const uniqueUserIds = [...new Set(data.map((b) => b.user_id))];
-  const userEmailMap: Record<string, string> = {};
+// Add this POST handler for creating a booking
+export async function POST(request: Request) {
+  try {
+    const { user_id, package_id } = await request.json();
 
-  await Promise.all(
-    uniqueUserIds.map(async (userId) => {
-      try {
-        const user = await clerkClient.users.getUser(userId);
-        userEmailMap[userId] = user.emailAddresses[0]?.emailAddress ?? 'No email';
-      } catch {
-        userEmailMap[userId] = 'Unknown';
-      }
-    })
-  );
+    if (!user_id || !package_id) {
+      return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const enriched = data.map((booking: any) => ({
-    ...booking,
-    user_email: userEmailMap[booking.user_id] || 'Unknown',
-  }));
+    await executeQuery({
+      query: `
+        INSERT INTO bookings (user_id, package_id)
+        VALUES (?, ?)
+      `,
+      values: [user_id, package_id],
+    });
 
-  return NextResponse.json(enriched);
+    return NextResponse.json({ message: 'Booking created' }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 }

@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -19,23 +18,35 @@ type Package = {
 
 export default function TourPackages() {
   const [packages, setPackages] = useState<Package[]>([]);
+  console.log('pacakges', packages)
   const router = useRouter();
   const { user } = useUser();
 
   useEffect(() => {
     const fetchPackages = async () => {
-      const { data, error } = await supabase.from('packages').select('*');
-      if (!error) {
+      try {
+        const res = await fetch('/api/packages');
+          console.log('res', res)
+
+        if (!res.ok) throw new Error('Failed to fetch');
+        const data: Package[] = await res.json();
+          console.log('data', data)
+
         const today = new Date();
         const filtered = data.filter(pkg => new Date(pkg.start_date) > today);
+
+
         setPackages(filtered);
-      } else {
-        console.error('Error fetching packages:', error.message);
+        
+      } catch (error) {
+        console.error('Error fetching packages:', error);
       }
     };
+
     fetchPackages();
   }, []);
 
+    console.log('pacakges', packages)
 
   const handleBook = async (pkgId: string) => {
     if (!user) {
@@ -44,14 +55,30 @@ export default function TourPackages() {
       return;
     }
 
-    const { error } = await supabase.from('bookings').insert({
-      user_id: user.id,
-      package_id: pkgId,
-    });
+    console.log('json', {
+          user_id: user.id,
+          package_id: pkgId,
+        })
+    console.log('string', JSON.stringify({
+          user_id: user.id,
+          package_id: pkgId,
+        }))
 
-    if (!error) {
+    try {
+      await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          package_id: pkgId,
+        }),
+      });
+
       router.push('/dashboard');
-    } else {
+    } catch (error) {
+      console.error('Booking error:', error);
       alert('Boeking mislukt');
     }
   };
@@ -59,7 +86,7 @@ export default function TourPackages() {
   return (
     <section id="offers" className="bg-gray-100 py-16">
       <div className="container mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold text-[#11999D] mb-4">Onze Speciale Aanbiedingen</h2>
+        <h2 className="text-3xl font-bold text-purple-700 mb-4">Onze Speciale Aanbiedingen</h2>
         <p className="text-gray-700 mb-10 max-w-3xl mx-auto">
           Bij Tulip bieden we op maat gemaakte reisaanbiedingen en -pakketten aan die zijn ontworpen om aan ieders wensen en budget te voldoen. Of je nu op zoek bent naar unieke rondreizen, betaalbare vliegtickets en hotelboekingen, of luxe ontvangst- en transportdiensten, wij hebben alles wat je nodig hebt.
         </p>
@@ -90,7 +117,7 @@ export default function TourPackages() {
                 </p>
                 <button
                   onClick={() => handleBook(pkg.id)}
-                  className="mt-auto px-4 py-2 bg-[#11999D] text-white rounded hover:bg-black"
+                  className="mt-auto px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
                 >
                   Boek nu
                 </button>

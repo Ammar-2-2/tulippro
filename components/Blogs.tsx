@@ -1,6 +1,5 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 
 type BlogPost = {
@@ -18,15 +17,15 @@ export default function Blogs() {
 
     useEffect(() => {
         const fetchBlogs = async () => {
-            const { data, error } = await supabase
-                .from('blog_posts')
-                .select('*')
-                .order('posted_at', { ascending: false })
-                .limit(4);
-
-            if (data) setBlogs(data);
-            if (error) console.error('Fout bij ophalen blogs:', error.message);
-            setLoading(false);
+            try {
+                const res = await fetch('/api/blogs/some');
+                const data = await res.json();
+                setBlogs(data);
+            } catch (error) {
+                console.error('Error fetching blogs:', error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         fetchBlogs();
@@ -42,7 +41,7 @@ export default function Blogs() {
     return (
         <section id="blogs" className="py-20 px-4 bg-white" dir="ltr">
             <div className="max-w-7xl mx-auto text-left">
-                <h2 className="text-3xl font-bold text-[#11999D] mb-2">📚 Onze Blog</h2>
+                <h2 className="text-3xl font-bold text-purple-700 mb-2">📚 Onze Blog</h2>
                 <p className="text-gray-600 mb-6">Ontdek de nieuwste reisverhalen van het Tulip-team.</p>
 
                 {loading ? (
@@ -61,12 +60,12 @@ export default function Blogs() {
                                             className="rounded-lg h-40 w-full object-cover mb-3"
                                         />
                                     )}
-                                    <h3 className="text-lg font-semibold text-[#11999D]">{blog.title}</h3>
+                                    <h3 className="text-lg font-semibold text-purple-800">{blog.title}</h3>
                                     <p className="text-sm text-gray-600 line-clamp-2 mt-1">{blog.content}</p>
                                     <p className="text-xs text-gray-400 mt-2">{formatDate(blog.posted_at)}</p>
                                     <Link
                                         href={`/blogs/${blog.id}`}
-                                        className="text-[#11999D] mt-2 inline-block hover:underline"
+                                        className="text-purple-600 mt-2 inline-block hover:underline"
                                     >
                                         Lees meer →
                                     </Link>
@@ -77,7 +76,7 @@ export default function Blogs() {
                         <div className="mt-8 text-center">
                             <Link
                                 href="/blogs"
-                                className="inline-block px-6 py-2 bg-[#11999D] text-white rounded hover:bg-black"
+                                className="inline-block px-6 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
                             >
                                 Bekijk alle blogs
                             </Link>

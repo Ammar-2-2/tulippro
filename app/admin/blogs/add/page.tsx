@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 
 export default function AddBlog() {
     const [title, setTitle] = useState('');
@@ -21,20 +20,28 @@ export default function AddBlog() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const { error } = await supabase.from('blog_posts').insert([
-            {
-                title,
-                subtitle,
-                content,
-                image_urls: imageUrls.filter((url) => url.trim() !== ''),
-                posted_at: new Date().toISOString(),
-            },
-        ]);
+        const payload = {
+            title,
+            subtitle,
+            content,
+            image_urls: imageUrls.filter(url => url.trim() !== ''),
+            posted_at: new Date().toISOString(),
+        };
 
-        if (error) {
-            console.error('Insert error:', error.message);
-        } else {
+        const res = await fetch('/api/blogs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
             router.push('/admin/dashboard');
+        } else {
+            const err = await res.json();
+            console.error('Insert error:', err.error);
+            alert('Failed to add blog post');
         }
     };
 
@@ -42,6 +49,7 @@ export default function AddBlog() {
         <div className="max-w-4xl mx-auto p-6 bg-white rounded shadow">
             <h1 className="text-2xl font-bold mb-6">Add New Blog Post</h1>
             <form onSubmit={handleSubmit}>
+                {/* Title */}
                 <div className="mb-4">
                     <label className="block font-semibold">Title</label>
                     <input
@@ -51,6 +59,7 @@ export default function AddBlog() {
                         required
                     />
                 </div>
+                {/* Subtitle */}
                 <div className="mb-4">
                     <label className="block font-semibold">Subtitle</label>
                     <input
@@ -60,6 +69,7 @@ export default function AddBlog() {
                         required
                     />
                 </div>
+                {/* Content */}
                 <div className="mb-4">
                     <label className="block font-semibold">Content</label>
                     <textarea
@@ -69,6 +79,7 @@ export default function AddBlog() {
                         required
                     />
                 </div>
+                {/* Image URLs */}
                 <div className="mb-4">
                     <label className="block font-semibold">Image URLs</label>
                     {imageUrls.map((url, idx) => (

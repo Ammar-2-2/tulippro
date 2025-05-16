@@ -1,23 +1,60 @@
-import { supabase } from '@/lib/supabase';
-import Link from 'next/link';
+"use client";
 
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-type Params = Promise<{
+type Blog = {
     id: string;
-}>;
+    title: string;
+    subtitle: string;
+    content: string;
+    posted_at: string;
+    image_urls?: string[] | null;
+};
 
+type BlogPageProps = {
+    params: { id: string; };
+};
 
-export default async function BlogPage({ params }: { params: Params; }) {
-    // Fetch the blog using the `id` from params
-    const { id } = await params;
-    const { data: blog, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('id', id) // Use params.id for the query
-        .single();
+export default function BlogPage({ params }: BlogPageProps) {
+    const { id } = params;
+    const [blog, setBlog] = useState<Blog | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
 
-    if (error || !blog) {
-        return <div className="p-10 text-center text-red-600">Kan het artikel niet laden</div>;
+    useEffect(() => {
+        async function fetchBlog() {
+            try {
+                const res = await fetch(`/api/blogs/${id}`);
+                if (!res.ok) {
+                    throw new Error(`Error fetching blog: ${res.statusText}`);
+                }
+                const data: Blog = await res.json();
+                setBlog(data);
+            } catch (err) {
+                if (err instanceof Error) {
+                    setError(err.message);
+                } else {
+                    setError("Onbekende fout");
+                }
+            }
+        }
+        fetchBlog();
+    }, [id]);
+
+    if (error) {
+        return (
+            <div className="p-10 text-center text-red-600">
+                Kan het artikel niet laden: {error}
+            </div>
+        );
+    }
+
+    if (!blog) {
+        return (
+            <div className="p-10 text-center text-gray-600">Laden...</div>
+        );
     }
 
     return (
@@ -25,10 +62,10 @@ export default async function BlogPage({ params }: { params: Params; }) {
             <h1 className="text-4xl font-bold text-purple-800 mb-4">{blog.title}</h1>
             <h2 className="text-xl text-gray-600 mb-4">{blog.subtitle}</h2>
             <p className="text-sm text-gray-500 mb-6">
-                Gepubliceerd op {new Date(blog.posted_at).toLocaleDateString('nl-NL')}
+                Gepubliceerd op {new Date(blog.posted_at).toLocaleDateString("nl-NL")}
             </p>
 
-            {blog.image_urls?.map((url: string, idx: number) => (
+            {blog.image_urls?.map((url, idx) => (
                 <img
                     key={idx}
                     src={url}
