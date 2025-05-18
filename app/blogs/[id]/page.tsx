@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 type Blog = {
     id: string;
@@ -13,17 +13,15 @@ type Blog = {
     image_urls?: string[] | null;
 };
 
-type BlogPageProps = {
-    params: { id: string; };
-};
-
-export default function BlogPage({ params }: BlogPageProps) {
-    const { id } = params;
+export default function BlogPage() {
+    const { id } = useParams<{ id: string; }>();
     const [blog, setBlog] = useState<Blog | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
+    // const router = useRouter();
 
     useEffect(() => {
+        if (!id) return;
+
         async function fetchBlog() {
             try {
                 const res = await fetch(`/api/blogs/${id}`);
@@ -40,6 +38,7 @@ export default function BlogPage({ params }: BlogPageProps) {
                 }
             }
         }
+
         fetchBlog();
     }, [id]);
 

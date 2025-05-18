@@ -19,7 +19,7 @@ export async function executeQuery<T>({
   values = []
 }: {
   query: string;
-  values?: any[];
+  values?: unknown[];
 }): Promise<T> {
   const connection = await getConnection();
   try {

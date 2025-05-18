@@ -209,10 +209,10 @@ export default function AdminDashboard() {
                 <nav className="space-y-4">
                     {[
                         ['dashboard', '📊 Dashboard'],
-                        ['bookings', '📦 Bookings'],
-                        ['messages', '💬 Messages'],
+                        ['bookings', '📦 Boekingen'],
+                        ['messages', '💬 Berichten'],
                         ['blogs', '📝 Blogs'],
-                        ['packages', '🎁 Packages']
+                        ['packages', '🎁 Pakketten']
                     ].map(([tab, label]) => (
                         <button
                             key={tab}
@@ -228,7 +228,7 @@ export default function AdminDashboard() {
                         href="/"
                         className="block text-center px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
                     >
-                        Go to Website
+                        Ga naar Website
                     </Link>
                 </div>
             </aside>
@@ -238,7 +238,7 @@ export default function AdminDashboard() {
                 {/* Dashboard Tab */}
                 {activeTab === 'dashboard' && (
                     <div>
-                        <h1 className="text-2xl font-bold mb-6 text-purple-700">Dashboard Analytics</h1>
+                        <h1 className="text-2xl font-bold mb-6 text-[#11999D]">Dashboard Analyse</h1>
                         <DashboardAnalytics
                             bookings={bookings}
                             tourPackages={tourPackages}
@@ -249,7 +249,7 @@ export default function AdminDashboard() {
 
                 {activeTab === 'messages' && (
                     <div>
-                        <h1 className="text-2xl font-bold mb-6 text-purple-700">All Messages</h1>
+                        <h1 className="text-2xl font-bold mb-6 text-purple-700">Alle berichten</h1>
                         {messages.map((msg) => {
                             const senderName = msg.user?.full_name || msg.name || 'Unknown';
                             const senderEmail = msg.user?.email || msg.email || 'N/A';
@@ -310,7 +310,7 @@ export default function AdminDashboard() {
                 {/* Bookings */}
                 {activeTab === 'bookings' && (
                     <>
-                        <h1 className="text-2xl font-bold mb-6 text-purple-700">Manage Bookings</h1>
+                        <h1 className="text-2xl font-bold mb-6 text-purple-700">Beheer boekingen</h1>
                         <div className="space-y-6">
                             {Object.entries(groupedBookings).map(([title, group]) => (
                                 <div key={title} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
@@ -350,12 +350,12 @@ export default function AdminDashboard() {
                 {activeTab === 'blogs' && (
                     <>
                         <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-2xl font-bold text-purple-700">Manage Blogs</h1>
+                            <h1 className="text-2xl font-bold text-purple-700">Beheer blogs</h1>
                             <button
                                 onClick={handleAddBlogClick}
                                 className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
                             >
-                                Add New Blog
+                                Nieuwe blog toevoegen
                             </button>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -371,13 +371,13 @@ export default function AdminDashboard() {
                                             href={`/admin/blogs/edit/${blog.id}`}
                                             className="text-sm px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                                         >
-                                            Edit
+                                            Bewerking
                                         </Link>
                                         <button
                                             onClick={() => deleteBlog(blog.id)}
                                             className="text-sm px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
                                         >
-                                            Delete
+                                            Verwijderen
                                         </button>
                                     </div>
                                 </div>
@@ -390,12 +390,12 @@ export default function AdminDashboard() {
                 {activeTab === 'packages' && (
                     <>
                         <div className="flex justify-between items-center mb-6">
-                            <h1 className="text-2xl font-bold text-purple-700">Manage Packages</h1>
+                            <h1 className="text-2xl font-bold text-purple-700">Pakketten beheren</h1>
                             <button
                                 onClick={() => router.push('/admin/packages/add')}
                                 className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition"
                             >
-                                Add New Package
+                                Nieuw pakket toevoegen
                             </button>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

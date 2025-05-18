@@ -1,9 +1,37 @@
 import { executeQuery } from '@/lib/mysql';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+
+interface BookingRecord {
+  id: string;
+  created_at: string;
+  user_id: string;
+  package_id: string;
+  title: string;
+  image_url: string;
+  start_date: string;
+  end_date: string;
+}
+
+interface BookingResponse {
+  id: string;
+  created_at: string;
+  user_id: string;
+  packages: {
+    title: string;
+    image_url: string;
+    start_date: string;
+    end_date: string;
+  };
+}
+
+interface CreateBookingBody {
+  user_id: string;
+  package_id: string;
+}
 
 export async function GET() {
   try {
-    const data = await executeQuery<any[]>({
+    const data = await executeQuery<BookingRecord[]>({
       query: `
         SELECT 
           b.id, 
@@ -16,10 +44,10 @@ export async function GET() {
           p.end_date
         FROM bookings b
         JOIN packages p ON b.package_id = p.id
-      `
+      `,
     });
 
-    const transformedData = data.map(booking => ({
+    const transformedData: BookingResponse[] = data.map((booking) => ({
       id: booking.id,
       created_at: booking.created_at,
       user_id: booking.user_id,
@@ -27,20 +55,23 @@ export async function GET() {
         title: booking.title,
         image_url: booking.image_url,
         start_date: booking.start_date,
-        end_date: booking.end_date
-      }
+        end_date: booking.end_date,
+      },
     }));
 
     return NextResponse.json(transformedData);
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('Error fetching bookings:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
 
-// Add this POST handler for creating a booking
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { user_id, package_id } = await request.json();
+    const { user_id, package_id } = (await request.json()) as CreateBookingBody;
 
     if (!user_id || !package_id) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
@@ -55,7 +86,11 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ message: 'Booking created' }, { status: 201 });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error('Error creating booking:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
