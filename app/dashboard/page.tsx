@@ -42,7 +42,7 @@ export default function Dashboard() {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              user_id: user.id,
+              user_id: user?.id,
               package_id: storedPackageId,
             }),
           });
@@ -58,7 +58,9 @@ export default function Dashboard() {
       try {
         const res = await fetch('/api/bookings');
         const data = await res.json();
-        const userBookings = data.filter((b: any) => b.user_id === user.id);
+        const userBookings = data.filter(
+          (b: Booking & { user_id: string; }) => user && b.user_id === user.id
+        );
         setBookings(userBookings);
       } catch (error) {
         console.error('Error fetching bookings:', error);
