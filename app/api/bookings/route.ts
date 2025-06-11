@@ -10,6 +10,8 @@ interface BookingRecord {
   image_url: string;
   start_date: string;
   end_date: string;
+  latitude: number;
+  longitude: number;
 }
 
 interface BookingResponse {
@@ -21,6 +23,8 @@ interface BookingResponse {
     image_url: string;
     start_date: string;
     end_date: string;
+    latitude: number;
+    longitude: number;
   };
 }
 
@@ -41,7 +45,9 @@ export async function GET() {
           p.title, 
           p.image_url, 
           p.start_date, 
-          p.end_date
+          p.end_date,
+          p.latitude,
+          p.longitude
         FROM bookings b
         JOIN packages p ON b.package_id = p.id
       `,
@@ -56,6 +62,8 @@ export async function GET() {
         image_url: booking.image_url,
         start_date: booking.start_date,
         end_date: booking.end_date,
+        latitude: booking.latitude,
+        longitude: booking.longitude,
       },
     }));
 

@@ -1,8 +1,14 @@
 'use client';
+
 import { useUser, UserButton } from '@clerk/nextjs';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import MessagesTab from '@/components/MessagesTab';
+import dynamic from 'next/dynamic';
+
+const MapTab = dynamic(() => import('@/components/MapTab'), {
+  ssr: false,
+});
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -12,6 +18,7 @@ const formatDate = (dateStr: string) => {
     day: 'numeric',
   });
 };
+
 interface Booking {
   id: string;
   created_at: string;
@@ -21,13 +28,15 @@ interface Booking {
     description: string;
     start_date: string;
     end_date: string;
+    latitude?: number;
+    longitude?: number;
   };
-};
+  user_id?: string;
+}
 
 export default function Dashboard() {
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState<'bookings' | 'messages'>('bookings');
-
+  const [activeTab, setActiveTab] = useState<'bookings' | 'messages' | 'map'>('bookings');
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   useEffect(() => {
@@ -59,7 +68,7 @@ export default function Dashboard() {
         const res = await fetch('/api/bookings');
         const data = await res.json();
         const userBookings = data.filter(
-          (b: Booking & { user_id: string; }) => user && b.user_id === user.id
+          (b: Booking & { user_id: string }) => user && b.user_id === user.id
         );
         setBookings(userBookings);
       } catch (error) {
@@ -72,6 +81,15 @@ export default function Dashboard() {
       fetchBookings();
     }
   }, [user?.id]);
+
+  // ✅ Haal geldige locaties uit boekingen
+  const validLocations = bookings
+    .filter(b => b.packages.latitude && b.packages.longitude)
+    .map(b => ({
+      lat: b.packages.latitude!,
+      lon: b.packages.longitude!,
+      title: b.packages.title,
+    }));
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -100,6 +118,15 @@ export default function Dashboard() {
                 }`}
             >
               💬 Messages
+            </button>
+            <button
+              onClick={() => setActiveTab('map')}
+              className={`block w-full text-left px-4 py-2 rounded ${activeTab === 'map'
+                ? 'bg-purple-600 text-white'
+                : 'hover:bg-purple-100 text-gray-700'
+                }`}
+            >
+              🗺️ Map
             </button>
           </nav>
         </div>
@@ -153,6 +180,17 @@ export default function Dashboard() {
               </div>
             ) : (
               <p className="text-gray-600">You have no bookings yet.</p>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'map' && (
+          <div>
+            <h1 className="text-2xl font-bold mb-6 text-purple-700">Nearby Places</h1>
+            {validLocations.length > 0 ? (
+              <MapTab locations={validLocations} />
+            ) : (
+              <p className="text-gray-500">Geen boekingen met locaties gevonden.</p>
             )}
           </div>
         )}
