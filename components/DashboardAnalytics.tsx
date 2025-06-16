@@ -26,7 +26,7 @@ const DashboardAnalytics: React.FC<Props> = ({ bookings, tourPackages, messages 
   // Maanden
   const months = Array.from({ length: 12 }, (_, i) => ({
     value: i,
-    label: new Date(0, i).toLocaleString('default', { month: 'long' }),
+    label: new Date(0, i).toLocaleString('nl-NL', { month: 'long' }),
   }));
 
   // Gekozen maand en jaar

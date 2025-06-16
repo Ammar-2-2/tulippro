@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import MessagesTab from '@/components/MessagesTab';
 import dynamic from 'next/dynamic';
+import FamilyForm from '@/components/FamilyForm';
 
 const MapTab = dynamic(() => import('@/components/MapTab'), {
   ssr: false,
@@ -36,7 +37,10 @@ interface Booking {
 
 export default function Dashboard() {
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState<'bookings' | 'messages' | 'map'>('bookings');
+
+  // 👇 Tab toegevoegd
+  const [activeTab, setActiveTab] = useState<'bookings' | 'messages' | 'map' | 'family'>('bookings');
+
   const [bookings, setBookings] = useState<Booking[]>([]);
 
   useEffect(() => {
@@ -47,9 +51,7 @@ export default function Dashboard() {
         try {
           await fetch('/api/bookings', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               user_id: user?.id,
               package_id: storedPackageId,
@@ -82,7 +84,6 @@ export default function Dashboard() {
     }
   }, [user?.id]);
 
-  // ✅ Haal geldige locaties uit boekingen
   const validLocations = bookings
     .filter(b => b.packages.latitude && b.packages.longitude)
     .map(b => ({
@@ -93,7 +94,6 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
       <aside className="w-64 bg-white p-6 shadow-md flex flex-col justify-between">
         <div>
           <div className="flex justify-between items-center mb-8">
@@ -128,6 +128,17 @@ export default function Dashboard() {
             >
               🗺️ Map
             </button>
+
+            {/* 👇 Extra tab */}
+            <button
+              onClick={() => setActiveTab('family')}
+              className={`block w-full text-left px-4 py-2 rounded ${activeTab === 'family'
+                ? 'bg-purple-600 text-white'
+                : 'hover:bg-purple-100 text-gray-700'
+                }`}
+            >
+              👨‍👩‍👧‍👦 Family
+            </button>
           </nav>
         </div>
         <div className="mt-8">
@@ -140,7 +151,6 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 p-8">
         {activeTab === 'messages' && (
           <div>
@@ -192,6 +202,14 @@ export default function Dashboard() {
             ) : (
               <p className="text-gray-500">Geen boekingen met locaties gevonden.</p>
             )}
+          </div>
+        )}
+
+        {/* 👇 Nieuw tab content */}
+        {activeTab === 'family' && (
+          <div>
+            <h1 className="text-2xl font-bold mb-6 text-purple-700">Mijn gezinssamenstelling</h1>
+            <FamilyForm />
           </div>
         )}
       </main>

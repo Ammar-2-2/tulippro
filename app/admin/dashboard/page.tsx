@@ -4,6 +4,8 @@ import { UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DashboardAnalytics from '@/components/DashboardAnalytics';
+import FamilyList from '@/components/FamilyList';
+
 
 type BlogPost = {
     id: string;
@@ -53,7 +55,7 @@ export default function AdminDashboard() {
     const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
     const [tourPackages, setTourPackages] = useState<TourPackage[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
-    const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'messages' | 'blogs' | 'packages'>('dashboard');
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'bookings' | 'messages' | 'blogs' | 'packages' | 'families'>('dashboard');
     const [responseData, setResponseData] = useState<Record<string, string>>({});
     const [editingMessages, setEditingMessages] = useState<Set<string>>(new Set());
 
@@ -212,11 +214,12 @@ export default function AdminDashboard() {
                         ['bookings', '📦 Boekingen'],
                         ['messages', '💬 Berichten'],
                         ['blogs', '📝 Blogs'],
-                        ['packages', '🎁 Pakketten']
+                        ['packages', '🎁 Pakketten'],
+                        ['families', '👪 Gezinnen'],
                     ].map(([tab, label]) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab as 'dashboard' | 'bookings' | 'messages' | 'blogs' | 'packages')}
+                            onClick={() => setActiveTab(tab as 'dashboard' | 'bookings' | 'messages' | 'blogs' | 'packages' | 'families')}
                             className={`block w-full text-left px-4 py-2 rounded ${activeTab === tab ? 'bg-purple-600 text-white' : 'hover:bg-purple-100 text-gray-700'}`}
                         >
                             {label}
@@ -417,6 +420,13 @@ export default function AdminDashboard() {
                         </div>
                     </>
                 )}
+
+                 {activeTab === 'families' && (
+                    <div>
+                        <h1 className="text-2xl font-bold mb-6 text-purple-700">Gezinssamenstellingen</h1>
+                        <FamilyList />
+                    </div>
+                )}
             </main>
         </div>
     );
@@ -424,7 +434,8 @@ export default function AdminDashboard() {
 
 // Date formatter
 function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    if (typeof window === 'undefined') return dateStr;
+    return new Date(dateStr).toLocaleDateString('nl-NL', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
